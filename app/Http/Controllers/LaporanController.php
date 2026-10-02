@@ -14,11 +14,14 @@ class LaporanController extends Controller
     {
         $title = 'Laporan';
 
-        $query = Pesanan::with('pelanggan');
+        $query = Pesanan::with(['pelanggan', 'paket']);
 
         // Filter berdasarkan rentang tanggal
-        if ($request->has('start_date') && $request->has('end_date')) {
-            $query->whereBetween('tanggal_pesanan', [$request->start_date, $request->end_date]);
+        if ($request->filled('start_date')) {
+            $query->whereDate('tanggal_pesanan', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('tanggal_pesanan', '<=', $request->end_date);
         }
     
         // Filter berdasarkan dropdown
@@ -27,23 +30,27 @@ class LaporanController extends Controller
         } elseif ($request->filter == 'week') {
             $query->whereBetween('tanggal_pesanan', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
         } elseif ($request->filter == 'month') {
-            $query->whereMonth('tanggal_pesanan', Carbon::now()->month);
+            $query->whereMonth('tanggal_pesanan', Carbon::now()->month)
+                  ->whereYear('tanggal_pesanan', Carbon::now()->year);
         } elseif ($request->filter == 'year') {
             $query->whereYear('tanggal_pesanan', Carbon::now()->year);
         }
     
-        $laporan = $query->get();
+        $laporan = $query->latest()->get();
     
         return view('admin.laporan.index', compact('title', 'laporan'));
     }
 
     public function exportpdf(Request $request)
     {
-        $query = Pesanan::with('pelanggan');
+        $query = Pesanan::with(['pelanggan', 'paket']);
 
         // Filter berdasarkan rentang tanggal
-        if ($request->has('start_date') && $request->has('end_date')) {
-            $query->whereBetween('tanggal_pesanan', [$request->start_date, $request->end_date]);
+        if ($request->filled('start_date')) {
+            $query->whereDate('tanggal_pesanan', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('tanggal_pesanan', '<=', $request->end_date);
         }
 
         // Filter berdasarkan dropdown
@@ -52,12 +59,13 @@ class LaporanController extends Controller
         } elseif ($request->filter == 'week') {
             $query->whereBetween('tanggal_pesanan', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
         } elseif ($request->filter == 'month') {
-            $query->whereMonth('tanggal_pesanan', Carbon::now()->month);
+            $query->whereMonth('tanggal_pesanan', Carbon::now()->month)
+                  ->whereYear('tanggal_pesanan', Carbon::now()->year);
         } elseif ($request->filter == 'year') {
             $query->whereYear('tanggal_pesanan', Carbon::now()->year);
         }
 
-        $laporan = $query->get();
+        $laporan = $query->latest()->get();
 
         $pdf = Pdf::loadView('admin.laporan.pdf', compact('laporan'));
 

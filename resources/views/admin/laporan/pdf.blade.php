@@ -39,8 +39,8 @@
             <tr>
                 <td>{{ $key+1 }}</td>
                 <td>{{ $item->no_invoice }}</td>
-                <td>{{ $item->pelanggan->nama }}</td>
-                <td>{{ $item->paket->nama_paket }}</td>
+                <td>{{ $item->pelanggan->nama ?? '-' }}</td>
+                <td>{{ $item->paket->nama_paket ?? '-' }}</td>
                 <td>{{ $item->berat }}</td>
                 <td>Rp {{ number_format($item->total_harga, 0, ',', '.') }}</td>
                 <td>
@@ -54,9 +54,9 @@
                         <span class="badge bg-primary text-white">{{ $item->status }}</span>
                     @endif
                 </td>
-                <td>{{ $item->tanggal_pesanan }}</td>
-                <td>{{ $item->tanggal_diproses }}</td>
-                <td>{{ $item->tanggal_selesai }}</td>
+                <td>{{ $item->tanggal_pesanan ?? '-' }}</td>
+                <td>{{ $item->tanggal_proses ?? '-' }}</td>
+                <td>{{ $item->tanggal_selesai ?? '-' }}</td>
             </tr>
 
             @endforeach

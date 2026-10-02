@@ -10,19 +10,21 @@
         <h6>Laporan ini menampilkan transaksi yang telah dilakukan.</h6>
         <div class="card mt-4">
             <div class="card-body">
-                {{-- <a href="{{ route('pesanan.create') }}" class="btn btn-primary mb-4"><i class="ti ti-plus mr-2"></i>Tambah Pesanan</a> --}}
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
                     Filter Rentang Tanggal <i class="ti ti-calendar mr-2"></i>
                 </button>
                 <a href="{{ route('laporan.export-pdf', request()->all()) }}" class="btn btn-success ms-1">Export PDF</a>
                 <select class="btn btn-outline-success ms-1" id="filterDropdown" onchange="submitFilter()">
-                    <option value="all" {{ request('filter') == 'all' ? 'selected' : '' }}>Semua</option>
+                    <option value="all" {{ request('filter') == 'all' || !request('filter') ? 'selected' : '' }}>Semua</option>
                     <option value="today" {{ request('filter') == 'today' ? 'selected' : '' }}>Hari Ini</option>
                     <option value="week" {{ request('filter') == 'week' ? 'selected' : '' }}>Minggu Ini</option>
                     <option value="month" {{ request('filter') == 'month' ? 'selected' : '' }}>Bulan Ini</option>
                     <option value="year" {{ request('filter') == 'year' ? 'selected' : '' }}>Tahun Ini</option>
                 </select>                
-                <div class="table-responsive">
+                @if(request('start_date') || request('end_date') || (request('filter') && request('filter') != 'all'))
+                    <a href="{{ route('laporan.index') }}" class="btn btn-outline-danger ms-1">Reset Filter</a>
+                @endif
+                <div class="table-responsive mt-3">
                     <table id="data-table" class="table table-striped table-borderless w-100">
                         <thead>
                             <tr>
@@ -44,8 +46,8 @@
                             <tr>
                                 <td>{{ $key+1 }}</td>
                                 <td>{{ $item->no_invoice }}</td>
-                                <td>{{ $item->pelanggan->nama }}</td>
-                                <td>{{ $item->paket->nama_paket }}</td>
+                                <td>{{ $item->pelanggan->nama ?? '-' }}</td>
+                                <td>{{ $item->paket->nama_paket ?? '-' }}</td>
                                 <td>{{ $item->berat }}</td>
                                 <td>Rp {{ number_format($item->total_harga, 0, ',', '.') }}</td>
                                 <td>
@@ -59,9 +61,9 @@
                                         <span class="badge bg-primary text-white">{{ $item->status }}</span>
                                     @endif
                                 </td>
-                                <td>{{ $item->tanggal_pesanan }}</td>
-                                <td>{{ $item->tanggal_diproses }}</td>
-                                <td>{{ $item->tanggal_selesai }}</td>
+                                <td>{{ $item->tanggal_pesanan ?? '-' }}</td>
+                                <td>{{ $item->tanggal_proses ?? '-' }}</td>
+                                <td>{{ $item->tanggal_selesai ?? '-' }}</td>
                             </tr>
 
                             @endforeach
@@ -82,10 +84,10 @@
                 </div>
                 <div class="modal-body">
                     <label for="start_date">Tanggal Mulai:</label>
-                    <input type="date" name="start_date" class="form-control">
+                    <input type="date" name="start_date" class="form-control" value="{{ request('start_date') }}">
                     
                     <label for="end_date" class="mt-3">Tanggal Akhir:</label>
-                    <input type="date" name="end_date" class="form-control">
+                    <input type="date" name="end_date" class="form-control" value="{{ request('end_date') }}">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
@@ -126,7 +128,7 @@
 
         function submitFilter() {
             const filter = document.getElementById('filterDropdown').value;
-            window.location.href = `/laporan?filter=${filter}`;
+            window.location.href = "{{ route('laporan.index') }}?filter=" + filter;
         }
     </script>
     <script>
