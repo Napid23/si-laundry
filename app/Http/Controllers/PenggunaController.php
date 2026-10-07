@@ -109,7 +109,7 @@ class PenggunaController extends Controller
         $user = User::find($id);
         $user->nama = $request->nama;
         $user->email = $request->email;
-        if ($user->password) {
+        if ($request->filled('password')) {
             $user->password = Hash::make($request->password);
         }
         $user->level = $request->level;
